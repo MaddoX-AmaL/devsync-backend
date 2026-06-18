@@ -5,6 +5,7 @@ from app.models.user_model import User
 from app.utils.security import hash_password
 from app.schemas.user_schema import UserLogin
 from app.utils.security import verify_password
+from app.utils.jwt_handler import create_access_token
 
 app = FastAPI()
 
@@ -63,6 +64,12 @@ def login(user: UserLogin):
             "message": "Invalid email or password"
         }
 
+    token = create_access_token(
+     {
+        "email": existing_user.email
+     }
+    )
+
     return {
-        "message": "Login successful"
+    "access_token": token
     }
