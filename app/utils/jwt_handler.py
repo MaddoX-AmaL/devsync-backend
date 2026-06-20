@@ -1,8 +1,11 @@
+import os
+from dotenv import load_dotenv
 from jose import jwt
 from jose import jwt, JWTError
 from fastapi import HTTPException
+load_dotenv()
 
-SECRET_KEY = "devsync-secret-key"
+SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = "HS256"
 
 
