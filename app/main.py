@@ -6,6 +6,9 @@ from app.utils.security import hash_password
 from app.schemas.user_schema import UserLogin
 from app.utils.security import verify_password
 from app.utils.jwt_handler import create_access_token
+from app.utils.jwt_handler import verify_token
+from fastapi import Header
+from app.schemas.user_schema import UserProfile
 
 app = FastAPI()
 
@@ -73,3 +76,20 @@ def login(user: UserLogin):
     return {
     "access_token": token
     }
+
+@app.get("/profile", response_model=UserProfile)
+def profile(token: str = Header()):
+
+    payload = verify_token(token)
+
+    db = SessionLocal()
+
+    user = db.query(User).filter(
+      User.email == payload["email"]
+    ).first()
+
+    return {
+    "id": user.id,
+    "name": user.name,
+    "email": user.email
+}
