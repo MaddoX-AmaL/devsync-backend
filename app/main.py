@@ -93,3 +93,10 @@ def profile(token: str = Header()):
     "name": user.name,
     "email": user.email
 }
+
+@app.get("/health")
+def health():
+    return {
+        "status": "healthy",
+        "service": "DevSync Backend"
+    }
