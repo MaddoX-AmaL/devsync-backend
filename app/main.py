@@ -9,6 +9,10 @@ from app.utils.jwt_handler import create_access_token
 from app.utils.jwt_handler import verify_token
 from fastapi import Header
 from app.schemas.user_schema import UserProfile
+from fastapi import Depends
+from sqlalchemy.orm import Session
+
+from app.dependencies import get_db
 
 app = FastAPI()
 
@@ -19,9 +23,9 @@ def root():
 
 
 @app.post("/signup")
-def signup(user: UserCreate):
+def signup(user: UserCreate,db: Session = Depends(get_db)):
 
-    db = SessionLocal()
+    
 
     existing_user = db.query(User).filter(
       User.email == user.email
@@ -46,9 +50,10 @@ def signup(user: UserCreate):
     }
 
 @app.post("/login")
-def login(user: UserLogin):
+def login(user: UserLogin,
+    db: Session = Depends(get_db)):
 
-    db = SessionLocal()
+    
 
     existing_user = db.query(User).filter(
         User.email == user.email
@@ -78,11 +83,11 @@ def login(user: UserLogin):
     }
 
 @app.get("/profile", response_model=UserProfile)
-def profile(token: str = Header()):
+def profile(token: str = Header(),db: Session = Depends(get_db)):
 
     payload = verify_token(token)
 
-    db = SessionLocal()
+    
 
     user = db.query(User).filter(
       User.email == payload["email"]
