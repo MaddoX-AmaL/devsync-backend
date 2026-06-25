@@ -15,11 +15,13 @@ from sqlalchemy.orm import Session
 from app.dependencies import get_db
 from fastapi import APIRouter
 from app.routers.auth import router as auth_router
+from app.routers.task import router as task_router
 
 router = APIRouter()
 
 app = FastAPI()
 app.include_router(auth_router)
+app.include_router(task_router)
 
 @app.get("/")
 def root():
