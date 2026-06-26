@@ -13,5 +13,10 @@ class TaskResponse(BaseModel):
     completed: bool
     owner_id: int
 
-    class Config:
-        from_attributes = True
+class Config:
+    from_attributes = True
+
+class TaskUpdate(BaseModel):
+    title: str
+    description: str
+    completed: bool
