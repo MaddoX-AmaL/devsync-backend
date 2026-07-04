@@ -3,11 +3,13 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.dependencies import get_db
+from app.models.task_model import Task
 from app.models.user_model import User
 from app.schemas.user_schema import UserCreate, UserLogin, UserProfile
 from app.utils.jwt_handler import create_access_token, verify_token
 from app.utils.security import hash_password, verify_password
 router = APIRouter()
+from app.core.auth import get_current_user
 
 @router.post("/signup")
 def signup(user: UserCreate,db: Session = Depends(get_db)):
@@ -83,3 +85,27 @@ def profile(token: str = Header(),db: Session = Depends(get_db)):
     "name": user.name,
     "email": user.email
 }
+
+
+@router.get("/me")
+def get_me(
+    current_user: User = Depends(get_current_user)
+):
+    return {
+        "id": current_user.id,
+        "name": current_user.name,
+        "email": current_user.email
+    }
+
+@router.get("/tasks/count")
+def count_tasks(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    total = db.query(Task).filter(
+        Task.owner_id == current_user.id
+    ).count()
+
+    return {
+        "total_tasks": total
+    }
