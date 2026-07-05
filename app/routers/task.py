@@ -103,3 +103,29 @@ def delete_task(
     return {
         "message": "Task deleted successfully"
     }
+
+@router.get("/tasks/completed")
+def get_completed_tasks(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    
+    tasks = db.query(Task).filter(
+        Task.owner_id == current_user.id,
+        Task.completed == True
+    ).all()
+
+    return tasks
+
+@router.get("/tasks/pending")
+def get_pending_tasks(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    
+    tasks = db.query(Task).filter(
+        Task.owner_id == current_user.id,
+        Task.completed == False
+    ).all()
+
+    return tasks
