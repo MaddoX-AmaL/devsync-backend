@@ -129,3 +129,29 @@ def get_pending_tasks(
     ).all()
 
     return tasks
+
+@router.get("/tasks/stats")
+def get_task_stats(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+
+    total = db.query(Task).filter(
+        Task.owner_id == current_user.id
+    ).count()
+
+    completed = db.query(Task).filter(
+        Task.owner_id == current_user.id,
+        Task.completed == True
+    ).count()
+
+    pending = db.query(Task).filter(
+        Task.owner_id == current_user.id,
+        Task.completed == False
+    ).count()
+
+    return {
+        "total": total,
+        "completed": completed,
+        "pending": pending
+    }
