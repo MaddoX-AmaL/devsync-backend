@@ -10,6 +10,7 @@ from app.utils.jwt_handler import create_access_token, verify_token
 from app.utils.security import hash_password, verify_password
 router = APIRouter()
 from app.core.auth import get_current_user
+from fastapi.security import OAuth2PasswordRequestForm
 
 @router.post("/signup")
 def signup(user: UserCreate,db: Session = Depends(get_db)):
@@ -39,13 +40,13 @@ def signup(user: UserCreate,db: Session = Depends(get_db)):
     }
 
 @router.post("/login")
-def login(user: UserLogin,
-    db: Session = Depends(get_db)):
-
-    
+def login(
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    db: Session = Depends(get_db)
+):
 
     existing_user = db.query(User).filter(
-        User.email == user.email
+        User.email == form_data.username
     ).first()
 
     if not existing_user:
@@ -54,7 +55,7 @@ def login(user: UserLogin,
         }
 
     if not verify_password(
-        user.password,
+        form_data.password,
         existing_user.password
     ):
         return {
@@ -62,13 +63,14 @@ def login(user: UserLogin,
         }
 
     token = create_access_token(
-     {
-        "email": existing_user.email
-     }
+        {
+            "email": existing_user.email
+        }
     )
 
     return {
-    "access_token": token
+        "access_token": token,
+        "token_type": "bearer"
     }
 
 @router.get("/profile", response_model=UserProfile)
