@@ -11,6 +11,8 @@ from app.schemas.task_schema import TaskCreate, TaskResponse, TaskUpdate
 from app.core.auth import get_current_user
 from app.models.user_model import User
 
+from fastapi import HTTPException
+
 router = APIRouter()
 
 @router.post("/tasks", response_model=TaskResponse)
@@ -32,12 +34,32 @@ def create_task(
 
     return new_task
 
-@router.get("/tasks", response_model=list[TaskResponse])
+@router.get("/tasks")
 def get_tasks(
+    status: str = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    tasks = db.query(Task).filter(Task.owner_id == current_user.id).all()
+    if status is not None and status not in ["completed", "pending"]:
+        raise HTTPException(
+            status_code=400,
+            detail="Status must be completed or pending"
+    )
+    query = db.query(Task).filter(
+        Task.owner_id == current_user.id
+    )
+
+    if status == "completed":
+        query = query.filter(
+            Task.completed == True
+        )
+
+    elif status == "pending":
+        query = query.filter(
+            Task.completed == False
+        )
+
+    tasks = query.all()
 
     return tasks
 
